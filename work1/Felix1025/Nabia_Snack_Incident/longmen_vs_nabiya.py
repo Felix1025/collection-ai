@@ -19,7 +19,7 @@ CRITICAL_HIT_THRESHOLD = 18
 def display_status(character_name, current_hp, max_hp):
     """打印格式: 【角色名】HP: 当前血量 / 最大血量"""
     # 在这里写你的代码，用print()函数
-    print(f"{character_name}HP:{current_hp}/{max_hp}")
+    print(f"【{character_name}】HP: {current_hp} / {max_hp}")
 
 
 # 任务二：掷骰子
@@ -28,7 +28,7 @@ def roll_dice(num_dice):
     total_points = 0
     count = 0
     # 在这里写你的代码
-    while count<=num_dice:
+    while count<num_dice:
         a=random.randint(1, 6)
         total_points+=a
         count+=1
@@ -140,49 +140,54 @@ def main_battle_loop():
     
     # 在这里写你的代码
     while nagato_hp>0 and nabiya_hp>0:
-      print(f"\n======== 回合 {turn} ========")
-      display_status("长门", nagato_hp, NAGATO_MAX_HP)
-      display_status("娜比娅", nabiya_hp, NABIYA_MAX_HP)
-      print("\n>>> 长门的回合")
-      action = choose_nagato_action(nagato_hp,nabiya_hp)
-      if action == 'attack':
-          base_damage=calculate_attack_damage(NAGATO_ATTACK_DICE)
-          if check_critical_hit(base_damage)==True:
-              attack_damage=base_damage*2
-              print("长门：「感受BIG SEVEN的威力吧！」")
-              print("💥「BIG SEVEN」触发！伤害翻倍！")
-          else :
-               attack_damage=base_damage
-          damage = max(0, attack_damage - nabiya_defense_bonus)
-          nabiya_hp -= damage
-      elif action == 'defend':
-          nagato_defense_bonus=calculate_defense_value(NAGATO_DEFEND_DICE)
+        nagato_defense_bonus = 0
+        nabiya_defense_bonus = 0
+        print(f"\n======== 回合 {turn} ========")
+        display_status("长门", nagato_hp, NAGATO_MAX_HP)
+        display_status("娜比娅", nabiya_hp, NABIYA_MAX_HP)
+        print("\n>>> 长门的回合")
+        action = choose_nagato_action(nagato_hp,nabiya_hp)
+        if action == 'attack':
+            base_damage=calculate_attack_damage(NAGATO_ATTACK_DICE)
+            if check_critical_hit(base_damage)==True:
+                attack_damage=base_damage*2
+                print("长门：「感受BIG SEVEN的威力吧！」")
+                print("💥「BIG SEVEN」触发！伤害翻倍！")
+            else :
+                attack_damage=base_damage
+                print("长门发动了普通攻击！")
+            damage = max(0, attack_damage - nabiya_defense_bonus)
+            nabiya_hp -= damage
+        elif action == 'defend':
+            print("长门进入防御状态，准备格挡攻击！")
+            nagato_defense_bonus=calculate_defense_value(NAGATO_DEFEND_DICE)
 
-      else :
-          p=random.randint(1,100)
-          if p<=50:
-             nabiya_hp-=SPECIAL_ATTACK_DAMAGE 
-          else:
-              print("唔…失手了…")
+        else :
+            p=random.randint(1,100)
+            if p<=50:
+                nabiya_hp-=SPECIAL_ATTACK_DAMAGE 
+            else:
+                print("唔…失手了…")
       
-      nabiya_defense_bonus=0
-      if nabiya_hp <= 0:
-          break
-      else:
+        if nabiya_hp <= 0:
+            nabiya_hp = 0
+            break
+        else:
+            time.sleep(1)
+            print("\n>>> 娜比娅的回合")
+            action=nabiya_ai_action(nabiya_hp)
+            if action == 'attack':
+                base_damage = calculate_attack_damage(NABIYA_ATTACK_DICE)
+                damage = max(0, base_damage - nagato_defense_bonus)
+                nagato_hp -= damage
+            elif action == 'defend':
+                print("娜比娅进入防御状态，准备格挡攻击！")
+                nabiya_defense_bonus = calculate_defense_value(NABIYA_DEFEND_DICE)
+            if nagato_hp <= 0:
+                nagato_hp = 0
+                break
+        turn = turn + 1
         time.sleep(1)
-        print("\n>>> 娜比娅的回合")
-        Action=nabiya_ai_action(nabiya_hp)
-        if Action=='defend':
-           nabiya_defense_bonus=calculate_defense_value(NABIYA_DEFEND_DICE)
-        elif Action == 'attack':
-            Base_damage=calculate_attack_damage(NABIYA_ATTACK_DICE)
-            damage = max(0, base_damage - nagato_defense_bonus)
-            nagato_hp -= damage
-        if nagato_hp <= 0:
-          break
-      turn = turn + 1
-      time.sleep(1)
-      nagato_defense_bonus = 0
     if nagato_hp <= 0:
         print("\n娜比娅胜利！")
     else:
